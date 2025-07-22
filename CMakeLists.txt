@@ -7,10 +7,14 @@ find_package(OpenCV REQUIRED)
 
 # Add executable
 add_executable(fcn_segmentation
-  src/fcn_segmentation_torch.cpp)
+  src/fcn_segmentation_torch.cpp
+  src/main.cpp)
 
 # Include directories
 target_include_directories(fcn_segmentation
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   PRIVATE
     ${TORCH_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS})
