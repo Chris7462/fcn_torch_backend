@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>fcn_segmentation_trt</name>
+  <name>fcn_segmentation_torch</name>
   <version>0.0.0</version>
-  <description>FCN Segmentation TensorRT Backend</description>
+  <description>FCN Segmentation Torch Backend</description>
   <maintainer email="chris7462@gmail.com">chris7462</maintainer>
   <license>Apache-2.0</license>
 
@@ -12,14 +12,6 @@
 
   <!-- System dependencies -->
   <depend>libopencv-dev</depend>
-
-  <!-- CUDA dependency -->
-  <exec_depend>cuda-toolkit</exec_depend>
-  <build_depend>cuda-toolkit</build_depend>
-
-  <!-- TensorRT dependency -->
-  <build_depend>libnvinfer-dev</build_depend>
-  <exec_depend>libnvinfer-dev</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -58,7 +58,7 @@ cv::Mat FcnSegmentationTorch::apply_colormap(const cv::Mat & mask)
 
   for (int i = 0; i < mask.rows; ++i) {
     for (int j = 0; j < mask.cols; ++j) {
-      int label = static_cast<int>(mask.at<uint8_t>(i, j));
+      size_t label = static_cast<size_t>(mask.at<uint8_t>(i, j));
       if (label < config::PASCAL_VOC_COLORMAP.size()) {
         // OpenCV uses BGR format, so we need to reverse the RGB values
         colormap.at<cv::Vec3b>(i, j) = cv::Vec3b(
