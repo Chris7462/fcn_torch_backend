@@ -16,11 +16,11 @@
 
 // Local includes
 #define private public
-#include "fcn_segmentation_torch/fcn_segmentation_torch.hpp"
+#include "fcn_torch_backend/fcn_torch_backend.hpp"
 #undef private
 
 
-class FcnSegmentationTorchTest : public ::testing::Test
+class FcnTorchBackendTest : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -29,7 +29,7 @@ protected:
     use_cuda_ = torch::cuda::is_available();
 
     try {
-      segmentor_ = std::make_unique<fcn_segmentation_torch::FcnSegmentationTorch>(
+      segmentor_ = std::make_unique<fcn_torch_backend::FcnTorchBackend>(
           model_path_, use_cuda_);
     } catch (const std::exception & e) {
       GTEST_SKIP() << "Failed to initialize Pytorch segmentor: " << e.what();
@@ -66,7 +66,7 @@ protected:
     cv::imwrite("test_output_overlay" + suffix + ".png", overlay);
   }
 
-  std::unique_ptr<fcn_segmentation_torch::FcnSegmentationTorch> segmentor_;
+  std::unique_ptr<fcn_torch_backend::FcnTorchBackend> segmentor_;
   bool use_cuda_;
 
 private:
@@ -75,7 +75,7 @@ private:
 };
 
 
-TEST_F(FcnSegmentationTorchTest, TestBasicInference)
+TEST_F(FcnTorchBackendTest, TestBasicInference)
 {
   cv::Mat image = load_test_image();
 
@@ -125,7 +125,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
   */
 }
 
-//TEST_F(FcnSegmentationTorchTest, TestMultipleInferences)
+//TEST_F(FcnTorchBackendTest, TestMultipleInferences)
 //{
 //  cv::Mat image = load_test_image();
 
@@ -178,7 +178,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //  }
 //}
 
-//TEST_F(FcnSegmentationTorchTest, TestBenchmarkInference)
+//TEST_F(FcnTorchBackendTest, TestBenchmarkInference)
 //{
 //  cv::Mat image = load_test_image();
 
@@ -217,7 +217,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //  EXPECT_GT(fps, 0.1) << "Throughput should be at least 0.1 FPS";
 //}
 
-//TEST_F(FcnSegmentationTorchTest, TestInputValidation)
+//TEST_F(FcnTorchBackendTest, TestInputValidation)
 //{
 //  // Test with empty image
 //  cv::Mat empty_image;
@@ -245,7 +245,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //  }
 //}
 
-//TEST_F(FcnSegmentationTorchTest, TestColormapApplication)
+//TEST_F(FcnTorchBackendTest, TestColormapApplication)
 //{
 //  cv::Mat image = load_test_image();
 //  cv::Mat segmentation = segmentor_->segment(image);
@@ -272,7 +272,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //}
 
 //// Test with multiple different images (if available)
-//TEST_F(FcnSegmentationTorchTest, DISABLED_TestMultipleImages)
+//TEST_F(FcnTorchBackendTest, DISABLED_TestMultipleImages)
 //{
 //  std::vector<std::string> test_images = {
 //    "image_000.png",
@@ -316,7 +316,7 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //}
 
 //// Test device switching if both CPU and GPU are available
-//TEST_F(FcnSegmentationTorchTest, DISABLED_TestDeviceSwitching)
+//TEST_F(FcnTorchBackendTest, DISABLED_TestDeviceSwitching)
 //{
 //  if (!torch::cuda::is_available()) {
 //    GTEST_SKIP() << "CUDA not available, skipping device switching test";
@@ -325,14 +325,14 @@ TEST_F(FcnSegmentationTorchTest, TestBasicInference)
 //  cv::Mat image = load_test_image();
 
 //  // Test CPU inference
-//  fcn_segmentation_torch::FcnSegmentationTorch cpu_inferencer(model_path_, false);
+//  fcn_torch_backend::FcnTorchBackend cpu_inferencer(model_path_, false);
 //  auto start_cpu = std::chrono::high_resolution_clock::now();
 //  cv::Mat cpu_result = cpu_inferencer.segment(image);
 //  auto end_cpu = std::chrono::high_resolution_clock::now();
 //  auto cpu_duration = std::chrono::duration<double, std::milli>(end_cpu - start_cpu);
 
 //  // Test GPU inference
-//  fcn_segmentation_torch::FcnSegmentationTorch gpu_inferencer(model_path_, true);
+//  fcn_torch_backend::FcnTorchBackend gpu_inferencer(model_path_, true);
 //  auto start_gpu = std::chrono::high_resolution_clock::now();
 //  cv::Mat gpu_result = gpu_inferencer.segment(image);
 //  auto end_gpu = std::chrono::high_resolution_clock::now();

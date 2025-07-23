@@ -2,7 +2,7 @@
 
 #include <opencv2/imgcodecs.hpp>
 
-#include "fcn_segmentation_torch/fcn_segmentation_torch.hpp"
+#include "fcn_torch_backend/fcn_torch_backend.hpp"
 
 
 
@@ -27,7 +27,7 @@ int main(int argc, const char* argv[])
     // Check CUDA availability and create segmentor
     bool use_cuda = torch::cuda::is_available();
 
-    fcn_segmentation_torch::FcnSegmentationTorch segmentor(model_path, use_cuda);
+    fcn_torch_backend::FcnTorchBackend segmentor(model_path, use_cuda);
 
     // Perform segmentation
     cv::Mat colored_mask = segmentor.segment(image);

@@ -14,12 +14,12 @@
 #include <torch/torch.h>
 
 
-namespace fcn_segmentation_torch
+namespace fcn_torch_backend
 {
-class FcnSegmentationTorch
+class FcnTorchBackend
 {
 public:
-  FcnSegmentationTorch(const std::string & model_path, bool use_cuda = false);
+  FcnTorchBackend(const std::string & model_path, bool use_cuda = false);
   cv::Mat segment(const cv::Mat & image);
 
 private:
@@ -30,4 +30,4 @@ private:
   torch::Device device_;
 };
 
-} // namespace fcn_segmentation_torch
+} // namespace fcn_torch_backend

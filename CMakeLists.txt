@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(fcn_segmentation_torch VERSION 1.0.0 LANGUAGES CXX)
+project(fcn_torch_backend VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -13,11 +13,11 @@ find_package(Torch REQUIRED)
 find_package(OpenCV REQUIRED)
 
 # Define the library target
-add_library(fcn_segmentation_torch STATIC
-  src/fcn_segmentation_torch.cpp)
+add_library(fcn_torch_backend STATIC
+  src/fcn_torch_backend.cpp)
 
 # Specify include directories for the target
-target_include_directories(fcn_segmentation_torch
+target_include_directories(fcn_torch_backend
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
@@ -25,15 +25,15 @@ target_include_directories(fcn_segmentation_torch
     ${OpenCV_INCLUDE_DIRS})
 
 # Link libraries
-target_link_libraries(fcn_segmentation_torch
+target_link_libraries(fcn_torch_backend
   PUBLIC
     ${TORCH_LIBRARIES}
     ${OpenCV_LIBS})
 
-target_compile_features(fcn_segmentation_torch PUBLIC cxx_std_17)
+target_compile_features(fcn_torch_backend PUBLIC cxx_std_17)
 
 # Optionally install the library
-install(TARGETS fcn_segmentation_torch
+install(TARGETS fcn_torch_backend
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -66,11 +66,11 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 
-  ament_add_gtest(test_fcn_segmentation_torch
-    test/test_fcn_segmentation_torch.cpp)
+  ament_add_gtest(test_fcn_torch_backend
+    test/test_fcn_torch_backend.cpp)
 
-  target_link_libraries(test_fcn_segmentation_torch
-    fcn_segmentation_torch
+  target_link_libraries(test_fcn_torch_backend
+    fcn_torch_backend
     gtest_main)
 
 endif()

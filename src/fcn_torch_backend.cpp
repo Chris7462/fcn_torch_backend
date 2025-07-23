@@ -1,12 +1,12 @@
 #include <opencv2/imgproc.hpp>
 
-#include "fcn_segmentation_torch/config.hpp"
-#include "fcn_segmentation_torch/fcn_segmentation_torch.hpp"
+#include "fcn_torch_backend/config.hpp"
+#include "fcn_torch_backend/fcn_torch_backend.hpp"
 
-namespace fcn_segmentation_torch
+namespace fcn_torch_backend
 {
 
-FcnSegmentationTorch::FcnSegmentationTorch(const std::string & model_path, bool use_cuda)
+FcnTorchBackend::FcnTorchBackend(const std::string & model_path, bool use_cuda)
 : device_(use_cuda ? torch::kCUDA : torch::kCPU)
 {
   // Load model
@@ -23,7 +23,7 @@ FcnSegmentationTorch::FcnSegmentationTorch(const std::string & model_path, bool 
 }
 
 // Main inference method - always returns colored segmentation
-cv::Mat FcnSegmentationTorch::segment(const cv::Mat & image)
+cv::Mat FcnTorchBackend::segment(const cv::Mat & image)
 {
   if (image.empty()) {
     throw std::invalid_argument("Input image is empty");
@@ -52,7 +52,7 @@ cv::Mat FcnSegmentationTorch::segment(const cv::Mat & image)
   return apply_colormap(result_mask);
 }
 
-cv::Mat FcnSegmentationTorch::apply_colormap(const cv::Mat & mask)
+cv::Mat FcnTorchBackend::apply_colormap(const cv::Mat & mask)
 {
   cv::Mat colormap(mask.rows, mask.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
@@ -73,7 +73,7 @@ cv::Mat FcnSegmentationTorch::apply_colormap(const cv::Mat & mask)
   return colormap;
 }
 
-torch::Tensor FcnSegmentationTorch::preprocess(const cv::Mat & image)
+torch::Tensor FcnTorchBackend::preprocess(const cv::Mat & image)
 {
   cv::Mat float_img;
   image.convertTo(float_img, CV_32FC3, 1.0 / 255);
@@ -98,4 +98,4 @@ torch::Tensor FcnSegmentationTorch::preprocess(const cv::Mat & image)
   return tensor_image.to(device_);
 }
 
-} // namespace fcn_segmentation_torch
+} // namespace fcn_torch_backend
