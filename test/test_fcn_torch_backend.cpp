@@ -20,17 +20,13 @@
 #undef private
 
 
-class FcnTorchBackendTest : public ::testing::Test
+class FCNTorchBackendTest : public ::testing::Test
 {
 protected:
   void SetUp() override
   {
-    // Check if CUDA is available
-    use_cuda_ = torch::cuda::is_available();
-
     try {
-      segmentor_ = std::make_unique<fcn_torch_backend::FcnTorchBackend>(
-          model_path_, use_cuda_);
+      segmentor_ = std::make_unique<fcn_torch_backend::FCNTorchBackend>(model_path_);
     } catch (const std::exception & e) {
       GTEST_SKIP() << "Failed to initialize Pytorch segmentor: " << e.what();
     }
@@ -50,7 +46,7 @@ protected:
     return image;
   }
 
-  cv::Mat create_overlay(const cv::Mat& original, const cv::Mat& segmentation, float alpha = 0.5f)
+  cv::Mat create_overlay(const cv::Mat & original, const cv::Mat & segmentation, float alpha = 0.5f)
   {
     cv::Mat overlay;
     cv::addWeighted(original, 1.0f - alpha, segmentation, alpha, 0.0, overlay);
@@ -66,8 +62,7 @@ protected:
     cv::imwrite("test_output_overlay" + suffix + ".png", overlay);
   }
 
-  std::unique_ptr<fcn_torch_backend::FcnTorchBackend> segmentor_;
-  bool use_cuda_;
+  std::unique_ptr<fcn_torch_backend::FCNTorchBackend> segmentor_;
 
 private:
   const std::string model_path_ = "fcn_resnet50_374x1238.pt";
@@ -75,7 +70,7 @@ private:
 };
 
 
-TEST_F(FcnTorchBackendTest, TestBasicInference)
+TEST_F(FCNTorchBackendTest, TestBasicInference)
 {
   cv::Mat image = load_test_image();
 
@@ -86,7 +81,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
   EXPECT_GT(image.cols, 0);
 
   std::cout << "Input image size: " << image.cols << "x" << image.rows << std::endl;
-  std::cout << "Using device: " << (use_cuda_ ? "CUDA" : "CPU") << std::endl;
+  std::cout << "Using device: " << (segmentor_->device_.is_cuda() ? "CUDA" : "CPU") << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
   cv::Mat segmentation = segmentor_->segment(image);
@@ -112,7 +107,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
   EXPECT_EQ(overlay.type(), CV_8UC3);
 
   // Save results for visual inspection
-  std::string device_suffix = use_cuda_ ? "_gpu" : "_cpu";
+  std::string device_suffix = segmentor_->device_.is_cuda() ? "_gpu" : "_cpu";
   save_results(image, segmentation, overlay, device_suffix);
 
   // Optional: Display results (comment out for automated testing)
@@ -125,7 +120,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
   */
 }
 
-//TEST_F(FcnTorchBackendTest, TestMultipleInferences)
+//TEST_F(FCNTorchBackendTest, TestMultipleInferences)
 //{
 //  cv::Mat image = load_test_image();
 
@@ -178,7 +173,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //  }
 //}
 
-//TEST_F(FcnTorchBackendTest, TestBenchmarkInference)
+//TEST_F(FCNTorchBackendTest, TestBenchmarkInference)
 //{
 //  cv::Mat image = load_test_image();
 
@@ -217,7 +212,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //  EXPECT_GT(fps, 0.1) << "Throughput should be at least 0.1 FPS";
 //}
 
-//TEST_F(FcnTorchBackendTest, TestInputValidation)
+//TEST_F(FCNTorchBackendTest, TestInputValidation)
 //{
 //  // Test with empty image
 //  cv::Mat empty_image;
@@ -234,7 +229,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //  for (const auto& size : test_sizes) {
 //    cv::Mat test_image = cv::Mat::zeros(size, CV_8UC3);
 //    // Fill with some pattern to make it non-zero
-//    cv::rectangle(test_image, cv::Rect(10, 10, size.width-20, size.height-20), 
+//    cv::rectangle(test_image, cv::Rect(10, 10, size.width-20, size.height-20),
 //                  cv::Scalar(128, 64, 192), -1);
 
 //    EXPECT_NO_THROW({
@@ -245,14 +240,14 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //  }
 //}
 
-//TEST_F(FcnTorchBackendTest, TestColormapApplication)
+//TEST_F(FCNTorchBackendTest, TestColormapApplication)
 //{
 //  cv::Mat image = load_test_image();
 //  cv::Mat segmentation = segmentor_->segment(image);
 
 //  // Check that the segmentation uses expected colors from Pascal VOC colormap
 //  std::set<cv::Vec3b> unique_colors;
-//  
+//
 //  for (int i = 0; i < segmentation.rows; ++i) {
 //    for (int j = 0; j < segmentation.cols; ++j) {
 //      unique_colors.insert(segmentation.at<cv::Vec3b>(i, j));
@@ -272,7 +267,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //}
 
 //// Test with multiple different images (if available)
-//TEST_F(FcnTorchBackendTest, DISABLED_TestMultipleImages)
+//TEST_F(FCNTorchBackendTest, DISABLED_TestMultipleImages)
 //{
 //  std::vector<std::string> test_images = {
 //    "image_000.png",
@@ -316,7 +311,7 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //}
 
 //// Test device switching if both CPU and GPU are available
-//TEST_F(FcnTorchBackendTest, DISABLED_TestDeviceSwitching)
+//TEST_F(FCNTorchBackendTest, DISABLED_TestDeviceSwitching)
 //{
 //  if (!torch::cuda::is_available()) {
 //    GTEST_SKIP() << "CUDA not available, skipping device switching test";
@@ -325,14 +320,14 @@ TEST_F(FcnTorchBackendTest, TestBasicInference)
 //  cv::Mat image = load_test_image();
 
 //  // Test CPU inference
-//  fcn_torch_backend::FcnTorchBackend cpu_inferencer(model_path_, false);
+//  fcn_torch_backend::FCNTorchBackend cpu_inferencer(model_path_, false);
 //  auto start_cpu = std::chrono::high_resolution_clock::now();
 //  cv::Mat cpu_result = cpu_inferencer.segment(image);
 //  auto end_cpu = std::chrono::high_resolution_clock::now();
 //  auto cpu_duration = std::chrono::duration<double, std::milli>(end_cpu - start_cpu);
 
 //  // Test GPU inference
-//  fcn_torch_backend::FcnTorchBackend gpu_inferencer(model_path_, true);
+//  fcn_torch_backend::FCNTorchBackend gpu_inferencer(model_path_, true);
 //  auto start_gpu = std::chrono::high_resolution_clock::now();
 //  cv::Mat gpu_result = gpu_inferencer.segment(image);
 //  auto end_gpu = std::chrono::high_resolution_clock::now();

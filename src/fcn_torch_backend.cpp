@@ -6,8 +6,8 @@
 namespace fcn_torch_backend
 {
 
-FcnTorchBackend::FcnTorchBackend(const std::string & model_path, bool use_cuda)
-: device_(use_cuda ? torch::kCUDA : torch::kCPU)
+FCNTorchBackend::FCNTorchBackend(const std::string & model_path)
+: device_(torch::cuda::is_available() ? torch::kCUDA : torch::kCPU)
 {
   // Load model
   try {
@@ -16,14 +16,14 @@ FcnTorchBackend::FcnTorchBackend(const std::string & model_path, bool use_cuda)
     model_.eval();  // Set to evaluation mode
 
     std::cout << "Model loaded successfully on "
-              << (device_.type() == torch::kCUDA ? "GPU" : "CPU") << std::endl;
+              << (device_.is_cuda() ? "CUDA" : "CPU") << std::endl;
   } catch (const c10::Error & e) {
     throw std::runtime_error("Error loading the model: " + std::string(e.what()));
   }
 }
 
 // Main inference method - always returns colored segmentation
-cv::Mat FcnTorchBackend::segment(const cv::Mat & image)
+cv::Mat FCNTorchBackend::segment(const cv::Mat & image)
 {
   if (image.empty()) {
     throw std::invalid_argument("Input image is empty");
@@ -52,7 +52,7 @@ cv::Mat FcnTorchBackend::segment(const cv::Mat & image)
   return apply_colormap(result_mask);
 }
 
-cv::Mat FcnTorchBackend::apply_colormap(const cv::Mat & mask)
+cv::Mat FCNTorchBackend::apply_colormap(const cv::Mat & mask)
 {
   cv::Mat colormap(mask.rows, mask.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
@@ -73,7 +73,7 @@ cv::Mat FcnTorchBackend::apply_colormap(const cv::Mat & mask)
   return colormap;
 }
 
-torch::Tensor FcnTorchBackend::preprocess(const cv::Mat & image)
+torch::Tensor FCNTorchBackend::preprocess(const cv::Mat & image)
 {
   cv::Mat float_img;
   image.convertTo(float_img, CV_32FC3, 1.0 / 255);

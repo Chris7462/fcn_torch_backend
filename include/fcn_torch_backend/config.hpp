@@ -61,4 +61,3 @@ constexpr std::array<std::array<unsigned char, 3>, 21> PASCAL_VOC_COLORMAP = {{
 //    }
 //    return colormap;
 //}
-
