@@ -65,7 +65,7 @@ protected:
   std::unique_ptr<fcn_torch_backend::FCNTorchBackend> segmentor_;
 
 private:
-  const std::string model_path_ = "fcn_resnet50_374x1238.pt";
+  const std::string model_path_ = "fcn_resnet101_374x1238.pt";
   const std::string image_path_ = "image_000.png";
 };
 

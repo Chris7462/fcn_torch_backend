@@ -17,8 +17,8 @@
 *.log
 *.pdf
 *.engine
-*.png
 *.pt
+*.png
 
 # Ignore build, devel, and logs folder
 build
