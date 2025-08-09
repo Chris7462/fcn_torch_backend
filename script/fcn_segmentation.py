@@ -4,8 +4,8 @@ from PIL import Image
 
 import torch
 from torchvision import transforms
-from torchvision.models.segmentation import fcn_resnet50
-from torchvision.models.segmentation import FCN_ResNet50_Weights
+from torchvision.models.segmentation import fcn_resnet101
+from torchvision.models.segmentation import FCN_ResNet101_Weights
 
 # === Step 1: Define the Pascal VOC colormap ===
 PASCAL_VOC_COLORMAP = [
@@ -41,8 +41,18 @@ def apply_colormap(mask):
     return colormap
 
 
+def create_overlay(original_img, colored_mask, alpha=0.5):
+    """Create an overlay of the segmentation mask on the original image."""
+    # Convert PIL image to numpy array
+    original_array = np.array(original_img)
+
+    # Create overlay by blending original image and colored mask
+    overlay = (1 - alpha) * original_array + alpha * colored_mask
+    return overlay.astype(np.uint8)
+
+
 # === Step 2: Load and preprocess image ===
-img_path = './fcn_torch_backend/script/image_000.png'  # Provide the path to your image
+img_path = './test/image_000.png'  # Provide the path to your image
 img_pil = Image.open(img_path).convert('RGB')
 
 # Define the transformations (normalization, resizing, etc.)
@@ -55,7 +65,7 @@ transform = transforms.Compose([
 input_tensor = transform(img_pil).unsqueeze(0)  # Shape: [1, 3, H, W]
 
 # === Step 3: Load pretrained FCN model ===
-model = fcn_resnet50(weights=FCN_ResNet50_Weights.DEFAULT)
+model = fcn_resnet101(weights=FCN_ResNet101_Weights.DEFAULT)
 model.eval()  # Set the model to evaluation mode
 
 # === Step 4: Run inference ===
@@ -66,15 +76,23 @@ with torch.no_grad():
 # === Step 5: Apply colormap ===
 colored_mask = apply_colormap(predicted_mask)
 
-# === Step 6: Show results ===
-plt.figure(figsize=(12, 6))
+# === Step 6: Create overlay ===
+overlay_image = create_overlay(img_pil, colored_mask, alpha=0.6)
 
-plt.subplot(2, 1, 1)
+# === Step 7: Show results ===
+plt.figure(figsize=(15, 5))
+
+plt.subplot(3, 1, 1)
 plt.imshow(img_pil)
 plt.title('Original Image')
 plt.axis('off')
 
-plt.subplot(2, 1, 2)
+plt.subplot(3, 1, 2)
+plt.imshow(overlay_image)
+plt.title('Overlay (Original + Mask)')
+plt.axis('off')
+
+plt.subplot(3, 1, 3)
 plt.imshow(colored_mask)
 plt.title('Segmented Mask (PASCAL VOC Colors)')
 plt.axis('off')
