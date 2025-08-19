@@ -6,8 +6,8 @@
 namespace fcn_torch_backend
 {
 
-FCNTorchBackend::FCNTorchBackend(const std::string & model_path)
-: device_(torch::cuda::is_available() ? torch::kCUDA : torch::kCPU)
+FCNTorchBackend::FCNTorchBackend(const std::string & model_path, torch::Device device)
+: device_(device)
 {
   // Load model
   try {
@@ -15,8 +15,7 @@ FCNTorchBackend::FCNTorchBackend(const std::string & model_path)
     model_.to(device_);
     model_.eval();  // Set to evaluation mode
 
-    std::cout << "Model loaded successfully on "
-              << (device_.is_cuda() ? "CUDA" : "CPU") << std::endl;
+    std::cout << "Model loaded successfully on " << device_ << std::endl;
   } catch (const c10::Error & e) {
     throw std::runtime_error("Error loading the model: " + std::string(e.what()));
   }

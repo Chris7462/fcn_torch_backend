@@ -25,16 +25,21 @@ class FCNTorchBackendTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    try {
-      segmentor_ = std::make_unique<fcn_torch_backend::FCNTorchBackend>(model_path_);
-    } catch (const std::exception & e) {
-      GTEST_SKIP() << "Failed to initialize Pytorch segmentor: " << e.what();
-    }
+    // This will be overridden by individual test cases
   }
 
   void TearDown() override
   {
     // Clean up if needed
+  }
+
+  void Init_segmentor(torch::Device device)
+  {
+    try {
+      segmentor_ = std::make_unique<fcn_torch_backend::FCNTorchBackend>(model_path_, device);
+    } catch (const std::exception & e) {
+      GTEST_SKIP() << "Failed to initialize Pytorch segmentor: " << e.what();
+    }
   }
 
   cv::Mat load_test_image()
@@ -70,8 +75,11 @@ private:
 };
 
 
-TEST_F(FCNTorchBackendTest, TestBasicInference)
+TEST_F(FCNTorchBackendTest, TestBasicInferenceCPU)
 {
+  torch::Device device = torch::kCPU;
+  Init_segmentor(device);
+
   cv::Mat image = load_test_image();
 
   // Validate input image
@@ -81,7 +89,7 @@ TEST_F(FCNTorchBackendTest, TestBasicInference)
   EXPECT_GT(image.cols, 0);
 
   std::cout << "Input image size: " << image.cols << "x" << image.rows << std::endl;
-  std::cout << "Using device: " << (segmentor_->device_.is_cuda() ? "CUDA" : "CPU") << std::endl;
+  std::cout << "Using device: " << device << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
   cv::Mat segmentation = segmentor_->segment(image);
@@ -107,8 +115,59 @@ TEST_F(FCNTorchBackendTest, TestBasicInference)
   EXPECT_EQ(overlay.type(), CV_8UC3);
 
   // Save results for visual inspection
-  std::string device_suffix = segmentor_->device_.is_cuda() ? "_gpu" : "_cpu";
-  save_results(image, segmentation, overlay, device_suffix);
+  save_results(image, segmentation, overlay, "_cpu");
+
+  // Optional: Display results (comment out for automated testing)
+  /*
+  cv::imshow("Original", image);
+  cv::imshow("Segmentation", segmentation);
+  cv::imshow("Overlay", overlay);
+  cv::waitKey(0);
+  cv::destroyAllWindows();
+  */
+}
+
+TEST_F(FCNTorchBackendTest, TestBasicInferenceCUDA)
+{
+  torch::Device device = torch::kCUDA;
+  Init_segmentor(device);
+
+  cv::Mat image = load_test_image();
+
+  // Validate input image
+  EXPECT_FALSE(image.empty());
+  EXPECT_EQ(image.type(), CV_8UC3);
+  EXPECT_GT(image.rows, 0);
+  EXPECT_GT(image.cols, 0);
+
+  std::cout << "Input image size: " << image.cols << "x" << image.rows << std::endl;
+  std::cout << "Using device: " << device << std::endl;
+
+  auto start = std::chrono::high_resolution_clock::now();
+  cv::Mat segmentation = segmentor_->segment(image);
+  auto end = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration<double, std::milli>(end - start);
+  std::cout << "Inference time: " << duration.count() << " ms" << std::endl;
+
+  // Validate output
+  EXPECT_FALSE(segmentation.empty());
+  EXPECT_EQ(segmentation.rows, image.rows);
+  EXPECT_EQ(segmentation.cols, image.cols);
+  EXPECT_EQ(segmentation.type(), CV_8UC3);  // Should be colored output
+
+  // Check if segmentation contains valid colors (not all black)
+  cv::Scalar mean_color = cv::mean(segmentation);
+  EXPECT_GT(mean_color[0] + mean_color[1] + mean_color[2], 0.0)
+    << "Segmentation appears to be all black";
+
+  // Create overlay
+  cv::Mat overlay = create_overlay(image, segmentation, 0.5f);
+  EXPECT_EQ(overlay.size(), image.size());
+  EXPECT_EQ(overlay.type(), CV_8UC3);
+
+  // Save results for visual inspection
+  save_results(image, segmentation, overlay, "_gpu");
 
   // Optional: Display results (comment out for automated testing)
   /*

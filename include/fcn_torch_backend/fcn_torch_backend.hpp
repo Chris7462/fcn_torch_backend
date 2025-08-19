@@ -19,7 +19,7 @@ namespace fcn_torch_backend
 class FCNTorchBackend
 {
 public:
-  FCNTorchBackend(const std::string & model_path);
+  FCNTorchBackend(const std::string & model_path, torch::Device device = torch::kCPU);
   cv::Mat segment(const cv::Mat & image);
 
 private:
