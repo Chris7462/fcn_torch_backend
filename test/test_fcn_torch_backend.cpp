@@ -33,7 +33,7 @@ protected:
     // Clean up if needed
   }
 
-  void Init_segmentor(torch::Device device)
+  void init_segmentor(torch::Device device)
   {
     try {
       segmentor_ = std::make_unique<fcn_torch_backend::FCNTorchBackend>(model_path_, device);
@@ -78,7 +78,7 @@ private:
 TEST_F(FCNTorchBackendTest, TestBasicInferenceCPU)
 {
   torch::Device device = torch::kCPU;
-  Init_segmentor(device);
+  init_segmentor(device);
 
   cv::Mat image = load_test_image();
 
@@ -130,7 +130,7 @@ TEST_F(FCNTorchBackendTest, TestBasicInferenceCPU)
 TEST_F(FCNTorchBackendTest, TestBasicInferenceCUDA)
 {
   torch::Device device = torch::kCUDA;
-  Init_segmentor(device);
+  init_segmentor(device);
 
   cv::Mat image = load_test_image();
 

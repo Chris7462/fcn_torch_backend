@@ -1,10 +1,7 @@
 #pragma once
 
 // C++ standard library version: This project uses the C++17 standard library.
-#include <iostream>
-#include <memory>
 #include <string>
-#include <vector>
 
 // OpenCV includes
 #include <opencv2/core.hpp>
@@ -20,6 +17,8 @@ class FCNTorchBackend
 {
 public:
   FCNTorchBackend(const std::string & model_path, torch::Device device = torch::kCPU);
+
+  // Run inference
   cv::Mat segment(const cv::Mat & image);
 
 private:

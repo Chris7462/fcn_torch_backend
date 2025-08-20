@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <opencv2/imgproc.hpp>
 
 #include "fcn_torch_backend/config.hpp"
